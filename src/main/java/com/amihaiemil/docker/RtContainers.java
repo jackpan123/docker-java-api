@@ -27,6 +27,7 @@ package com.amihaiemil.docker;
 
 import org.apache.http.HttpStatus;
 import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.message.BasicHeader;
@@ -57,7 +58,7 @@ abstract class RtContainers implements Containers {
      * Docker API.
      */
     private final Docker docker;
-    
+
     /**
      * Ctor.
      * @param client Given HTTP Client.
@@ -136,7 +137,7 @@ abstract class RtContainers implements Containers {
             post.releaseConnection();
         }
     }
-    
+
     @Override
     public Docker docker() {
         return this.docker;
@@ -157,5 +158,36 @@ abstract class RtContainers implements Containers {
      */
     URI baseUri() {
         return this.baseUri;
+    }
+
+    /**
+     * Get container stats based on resource usage by container Id.
+     *
+     * @param containerId Id of the Container
+     * @return This container resource usage.
+     * @throws IOException If something goes wrong.
+     */
+    @Override
+    public JsonObject stats(final String containerId) throws IOException {
+        if(containerId.isEmpty()) {
+            throw new IOException("Container Id must not be null.");
+        }
+
+        String uri = this.baseUri.toString()
+            .concat("/").concat(containerId)
+            .concat("/stats?stream=false");
+        final HttpGet get = new HttpGet(URI.create(uri));
+        try {
+            get.setHeader(new BasicHeader("Content-Type", "application/json"));
+            final JsonObject json = this.client.execute(
+                get,
+                new ReadJsonObject(
+                    new MatchStatus(get.getURI(), HttpStatus.SC_OK)
+                )
+            );
+            return json;
+        } finally {
+            get.releaseConnection();
+        }
     }
 }
