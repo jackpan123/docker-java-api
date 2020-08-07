@@ -49,7 +49,7 @@ public interface Images extends Iterable<Image> {
      * @param tag Tag or digest for the image.
      * @return The created {@link Image}.
      * @throws IOException If an I/O error occurs.
-     * @throws UnexpectedResponseException If the API responds with an 
+     * @throws UnexpectedResponseException If the API responds with an
      *  unexpected status.
      * @checkstyle ParameterNumber (4 lines)
      */
@@ -82,6 +82,18 @@ public interface Images extends Iterable<Image> {
      */
     Images importFromTar(
         String file) throws IOException, UnexpectedResponseException;
+
+    /**
+     * Import images from file input stream.
+     *
+     * @param file Path to Tar file containing Images.
+     * @return Images All images, including the newly imported ones.
+     * @throws IOException If an I/O error occurs.
+     * @throws UnexpectedResponseException If the API responds with an
+     *  unexpected status.
+     */
+    Images importFromSyncStream(
+        final String file) throws IOException, UnexpectedResponseException;
 
     /**
      * Deletes unused images.

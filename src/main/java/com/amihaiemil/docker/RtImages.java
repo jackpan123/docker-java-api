@@ -26,6 +26,7 @@
 package com.amihaiemil.docker;
 
 import java.io.ByteArrayInputStream;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.Reader;
@@ -40,6 +41,7 @@ import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.ContentType;
+import org.apache.http.entity.InputStreamEntity;
 import org.apache.http.entity.StringEntity;
 
 /**
@@ -146,6 +148,30 @@ abstract class RtImages implements Images {
                     new String(
                         Files.readAllBytes(Paths.get(file))
                     ),
+                    ContentType.DEFAULT_BINARY
+                )
+            );
+            this.client.execute(
+                load,
+                new MatchStatus(load.getURI(), HttpStatus.SC_OK)
+            );
+        } finally {
+            load.releaseConnection();
+        }
+        return this;
+    }
+
+    @Override
+    public Images importFromSyncStream(
+        final String file) throws IOException, UnexpectedResponseException {
+        final HttpPost load  = new HttpPost(
+            new UncheckedUriBuilder(this.baseUri.toString().concat("/load"))
+                .build()
+        );
+        try {
+            load.setEntity(
+                new InputStreamEntity(
+                    new FileInputStream(file),
                     ContentType.DEFAULT_BINARY
                 )
             );
