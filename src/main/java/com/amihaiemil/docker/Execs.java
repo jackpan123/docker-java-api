@@ -25,6 +25,9 @@
  */
 package com.amihaiemil.docker;
 
+import java.io.IOException;
+import javax.json.JsonObject;
+
 /**
  * The Exec API. More about it here:<br>
  * https://docs.docker.com/engine/api/v1.40/#tag/Exec
@@ -46,5 +49,18 @@ public interface Execs {
      * @return Docker.
      */
     Docker docker();
+
+    /**
+     * Return low-level information about this exec instance.
+     * @param containerId Id of certain container.
+     * @param exec Param of object.
+     * @return ExecInstance object.
+     * @see <a href="https://docs.docker.com/engine/api/v1.35/#operation/ImageInspect">Inspect Image</a>
+     * @throws IOException If something goes wrong.
+     * @throws UnexpectedResponseException If the status response is not
+     *  the expected one (200 OK).
+     */
+    Exec create(final String containerId, final JsonObject exec)
+        throws IOException, UnexpectedResponseException;
 
 }

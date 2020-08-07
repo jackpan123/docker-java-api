@@ -25,9 +25,15 @@
  */
 package com.amihaiemil.docker;
 
+import java.io.IOException;
+import javax.json.JsonObject;
+import org.apache.http.HttpStatus;
 import org.apache.http.client.HttpClient;
 
 import java.net.URI;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.StringEntity;
+import org.apache.http.message.BasicHeader;
 
 /**
  * RESTful Execs API.
@@ -71,6 +77,42 @@ final class RtExecs implements Execs {
             URI.create(this.baseUri.toString() + "/" + execId),
             this.docker
         );
+    }
+
+    /**
+     * Return low-level information about this exec instance.
+     *
+     * @param containerId Id of certain container.
+     * @param exec Execution command.
+     * @return Exec object.
+     * @throws IOException                 If something goes wrong.
+     * @throws UnexpectedResponseException If the status response is not
+     *                                     the expected one (200 OK).
+     */
+    @Override
+    public Exec create(final String containerId,
+        final JsonObject exec) throws IOException, UnexpectedResponseException {
+        final URI uri = new UncheckedUriBuilder(
+            this.baseUri.toString().concat("/containers/" + containerId)
+                .concat("/exec")).build();
+        final HttpPost post = new HttpPost(uri);
+        try {
+            post.setEntity(new StringEntity(exec.toString()));
+            post.setHeader(new BasicHeader("Content-Type", "application/json"));
+            final JsonObject json = this.client.execute(
+                post,
+                new ReadJsonObject(
+                    new MatchStatus(post.getURI(), HttpStatus.SC_CREATED)
+                )
+            );
+            return new RtExec(this.client,
+                URI.create(
+                    this.baseUri.toString() + "/exec/" + json.getString("Id")
+                ),
+                this.docker);
+        } finally {
+            post.releaseConnection();
+        }
     }
 
     @Override

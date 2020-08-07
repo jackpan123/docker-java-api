@@ -25,11 +25,15 @@
  */
 package com.amihaiemil.docker;
 
+import org.apache.http.HttpStatus;
 import org.apache.http.client.HttpClient;
 
 import javax.json.JsonObject;
 import java.io.IOException;
 import java.net.URI;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.StringEntity;
+import org.apache.http.message.BasicHeader;
 
 /**
  * Exec. A batch of commands that are running inside a Container.
@@ -70,6 +74,29 @@ final class RtExec implements Exec {
     public JsonObject inspect()
         throws IOException, UnexpectedResponseException {
         return new Inspection(this.client, this.baseUri.toString() + "/json");
+    }
+
+    @Override
+    public String start(final JsonObject exec)
+        throws IOException, UnexpectedResponseException {
+        final HttpPost start = new HttpPost(
+            this.baseUri.toString() + "/start"
+        );
+        try {
+            start.setEntity(new StringEntity(exec.toString()));
+            start.setHeader(new BasicHeader("Content-Type",
+                "application/json"));
+            final String string = this.client.execute(
+                start,
+                new ReadString(
+                    new MatchStatus(start.getURI(), HttpStatus.SC_CREATED)
+                )
+            );
+
+            return string;
+        } finally {
+            start.releaseConnection();
+        }
     }
 
 }

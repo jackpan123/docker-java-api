@@ -46,4 +46,17 @@ public interface Exec {
      */
     JsonObject inspect() throws IOException, UnexpectedResponseException;
 
+    /**
+     * Starts a previously set up exec instance. If detach is true,
+     * this endpoint returns immediately after starting the command.
+     * Otherwise, it sets up an interactive session with the command.
+     * @param exec Exec object.
+     * @return String result.
+     * @throws IOException If something goes wrong.
+     * @throws UnexpectedResponseException If the status response is not
+     * the expected one (200 OK).
+     * */
+    String start(final JsonObject exec)
+        throws IOException, UnexpectedResponseException;
+
 }
