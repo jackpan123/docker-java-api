@@ -75,20 +75,20 @@ public final class TcpDocker extends RtDocker {
 
     /**
      * Tcp Docker engine.
-     * 
+     *
      * An insecure docker API v1.35 endpoint is assumed.
-     * 
+     *
      * @param uri Remote Docker URI.
      */
     public TcpDocker(final URI uri) {
         this(new PlainHttpClient(), uri);
-    }    
-    
+    }
+
     /**
      * Tcp Docker engine.
-     * 
+     *
      * An insecure docker API v1.35 endpoint is assumed.
-     * 
+     *
      * @param uri Remote Docker URI.
      * @param auth Remote Docker {@link Auth}
      */
@@ -123,5 +123,20 @@ public final class TcpDocker extends RtDocker {
         final HttpClient client, final URI uri, final String version
     ) {
         super(client, URI.create(uri.toString() + "/" + version));
+    }
+
+    /**
+     * Tcp Docker engine. You have to configure your own HttpClient,
+     * most likely with some authentication mechanism, depending on where
+     * the Docker engine is on the Network.
+     *
+     * @param uri Remote Docker URI.
+     * @param version API version (eg. v1.35).
+     */
+    public TcpDocker(
+        final URI uri, final String version
+    ) {
+        super(new PlainHttpClient(),
+            URI.create(uri.toString() + "/" + version));
     }
 }
